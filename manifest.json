@@ -1,16 +1,16 @@
 {
-  "id": "dev.replugged.PluginTemplate",
-  "name": "Plugin Template",
-  "description": "A plugin template",
+  "id": "dev.wolfplugs.Guild-Profile",
+  "name": "Guild Profile",
+  "description": "shows the guild profile",
   "author": {
-    "name": "replugged",
-    "discordID": "1000992611840049192",
-    "github": "replugged-org"
+    "name": "wolfplugs",
+    "discordID": "347096063569559553",
+    "github": "WolfPlugs"
   },
   "version": "1.0.0",
   "updater": {
     "type": "github",
-    "id": "replugged-org/plugin-template"
+    "id": "WolfPlugs/Guild-Profile"
   },
   "license": "MIT",
   "type": "replugged-plugin",
