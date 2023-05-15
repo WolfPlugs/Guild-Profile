@@ -1,5 +1,8 @@
 import { Injector, Logger, common, webpack } from "replugged";
-const { fluxDispatcher: FluxDispatcher } = common;
+import GuildModal from "./modal/guildProfile";
+const { fluxDispatcher, React } = common;
+const { openModal } = common.modal
+
 class GuildProfile {
   private inject = new Injector();
   private logger = Logger.plugin("GuildProfile");
@@ -30,5 +33,23 @@ export function stop(): void {
 
 export function guildMenu(menu: any): void {
   if (menu?.navId !== "guild-header-popout") return;
+  const { MenuGroup, MenuItem } = webpack.getByProps(["Menu", "MenuItem", "MenuGroup"]) as any;
+
+  if (!MenuGroup) return;
+  if (menu.children.at(-2)?.props?.name === "guild-profile") return;
+
+  const guild = 
+  <MenuGroup name="guild-profile" id="poop">
+    <MenuItem
+      label="Guild Profile"
+      id="pee"
+      action={() =>
+        openModal((props) => <GuildModal {...props} />
+        )}/>
+  </MenuGroup>;
+
+  menu.children.splice(-1, 0, guild);
+
+  console.log(menu);
 
 }
