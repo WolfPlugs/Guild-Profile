@@ -1,5 +1,6 @@
 import { Injector, Logger, common, webpack } from "replugged";
-import GuildModal from "./modal/guildProfile";
+import GuildProfileModal from "./modal/guildProfile";
+
 const { fluxDispatcher, React } = common;
 const { openModal } = common.modal
 
@@ -23,6 +24,7 @@ class GuildProfile {
 }
 
 const guildProfile = new GuildProfile();
+
 export async function start(): Promise<void> {
   await guildProfile.start();
 }
@@ -44,7 +46,7 @@ export function guildMenu(menu: any): void {
       label="Guild Profile"
       id="pee"
       action={() =>
-        openModal((props) => <GuildModal {...props} />
+        openModal((props) => <GuildProfileModal {...props} />
         )}/>
   </MenuGroup>;
 
