@@ -2,7 +2,7 @@ import { Guild } from "discord-types/general";
 import { common, components, webpack } from "replugged";
 import { GuildProfileHeader } from "./guildProfileHeader";
 
-const { React, flux } = common;
+const { React, flux, users } = common;
 const { Modal: { ModalRoot, ModalHeader, ModalContent, ModalFooter }, ErrorBoundary, Flex } = components;
 
 const { tabBarContainer, tabBar, tabBarItem, topSectionNormal } = await webpack.waitForModule<{
@@ -21,6 +21,10 @@ const TabBar = webpack.getExportsForProps(
   ["Header", "Item", "Panel", "Separator"],
 ) as unknown as Discord.TabBar;
 
+const relationShips = await webpack.waitForProps(["getRelationships"]).then(Object.getPrototypeOf)
+const Users = await webpack.waitForProps(['getCurrentUser', 'getUser']).then(Object.getPrototypeOf)
+const guildUsers = await webpack.waitForProps(['isMember']).then(Object.getPrototypeOf)
+
 const GuildProfileSections = {
   GUILD_INFO: 'GUILD_INFO',
   FRIENDS: 'FRIENDS',
@@ -34,80 +38,80 @@ export const GuildProfileModal = (props) => {
   const [counts, setCount] = React.useState(0);
 
   const { guild } = props;
-  async function componentDidMount() {
-    const { getMemberCounts } = props;
-    const memberData = await getMemberCounts(guild.id);
-    setCount(memberData);
-  }
+  // async function componentDidMount() {
+  //   const { getMemberCounts } = props;
+  //   const memberData = await getMemberCounts(guild.id);
+  //   setCount(memberData);
+  // }
 
-  React.useEffect(() => {
-    componentDidMount();
-  });
+  // React.useEffect(async () => {
+  //   await componentDidMount();
+  // });
 
   return (
-    <ModalRoot className={root} transitionState={1}>
-      <div className={topSectionNormal}>
-        <ErrorBoundary>
+    <ErrorBoundary>
+      <ModalRoot className={root} transitionState={1}>
+        <div className={topSectionNormal}>
           <GuildProfileHeader guild={guild} counts={counts} />
-            <TabBar
-              type='top'
-              className={tabBar}
-              selectedItem={section}
-              onItemSelect={setSection}
+          <TabBar
+            type='top'
+            className={tabBar}
+            selectedItem={section}
+            onItemSelect={setSection}
+          >
+            <TabBar.Item
+              className={tabBarItem}
+              id={GuildProfileSections.GUILD_INFO}
+              key={GuildProfileSections.GUILD_INFO}
             >
-              <TabBar.Item
-                className={tabBarItem}
-                id={GuildProfileSections.GUILD_INFO}
-                key={GuildProfileSections.GUILD_INFO}
-              >
-                Server Info
-              </TabBar.Item>
-              <TabBar.Item
-                className={tabBarItem}
-                id={GuildProfileSections.FRIENDS}
-                key={GuildProfileSections.FRIENDS}
-              >
-                Friends
-              </TabBar.Item>
-              <TabBar.Item
-                className={tabBarItem}
-                id={GuildProfileSections.BLOCKED_USERS}
-                key={GuildProfileSections.BLOCKED_USERS}
-              >
-                Blocked Users
-              </TabBar.Item>
-            </TabBar>
-        </ErrorBoundary>
-      </div>
-    </ModalRoot>
+              Server Info
+            </TabBar.Item>
+            <TabBar.Item
+              className={tabBarItem}
+              id={GuildProfileSections.FRIENDS}
+              key={GuildProfileSections.FRIENDS}
+            >
+              Friends
+            </TabBar.Item>
+            <TabBar.Item
+              className={tabBarItem}
+              id={GuildProfileSections.BLOCKED_USERS}
+              key={GuildProfileSections.BLOCKED_USERS}
+            >
+              Blocked Users
+            </TabBar.Item>
+          </TabBar>
+        </div>
+      </ModalRoot>
+    </ErrorBoundary>
+
   )
 
 }
 
-flux.connectStores(
+export default flux.connectStores(
   [
-  webpack.getByProps('getRelationships'),
-  webpack.getByProps(['getCurrentUser', 'getUser']),
-  webpack.getByProps(['isMember']),
-],
-  ([relationshipStore, userStore, membersStore], compProps) => {
-    const userFetcher = webpack.getByProps(['getUser']);
-    const relationships = relationshipStore.getRelationships();
+    relationShips,
+    Users,
+    guildUsers,
+  ],
+  (compProps) => {
+    const relationships = relationShips.getRelationships();
     const props = {
       friends: [],
       blocked: [],
     }
 
     for (const userId in relationships) {
-      if (!membersStore.isMember(compProps.guild.id, userId)) {
+      if (!guildUsers.isMember(compProps.guild.id, userId)) {
         continue;
       }
 
 
       const relationshipType = relationships[userId];
-      const user = userStore.getUser(userId);
+      const user = Users.getUser(userId);
       if (!user) {
-        userFetcher?.getUser(userId);
+        users?.getUser(userId);
         continue;
       }
 
@@ -120,6 +124,4 @@ flux.connectStores(
 
     return props;
   }
-)(GuildProfileModal)
-
-export default GuildProfileModal;
+)(GuildProfileModal) as unknown as typeof GuildProfileModal;
