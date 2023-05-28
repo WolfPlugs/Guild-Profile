@@ -1,19 +1,22 @@
 import { Injector, Logger, common, webpack } from "replugged";
-import GuildProfileModal from "./modal/guildProfile";
 
-const { fluxDispatcher, React, Flux } = common;
+import GuildProfileModal from "./modal/guildProfile";
+import memberCountsStore from "./store"
+import memberCountsActions from "./acts"
+
+const { fluxDispatcher, React, flux } = common;
 const { openModal } = common.modal
 
-const memberCounts = [];
-
-// export Object.freeze({
-//   FluxActions: {
-//     UPDATE_MEMBER_COUNTS: "GUILD_PROFILE_UPDATE_MEMBER_COUNTS",
-//   }
-// })
 
 class GuildProfile {
   private logger = Logger.plugin("GuildProfile");
+
+
+
+  public handleMemberListUpdate(memberListUpdate) {
+    updateTheMemberCounts(memberListUpdate);
+  }
+
 
   public async start(): Promise<void> {
     this.logger.log("Starting GuildProfile");
@@ -24,28 +27,16 @@ class GuildProfile {
   }
 }
 
-// probably move this to another file?
-class MemberCountStore extends Flux.Store {
-  public getStore(): any {
-    return {
-      memberCounts,
-    }
-  }
-
-  getAllMemberCounts(): any {
-    return memberCounts;
-  }
-
-  getMemberCounts(guildId: string): any {
-    return memberCounts.find((memberCounts) => memberCounts.guildId === guildId);
-  }
-}
-
 
 const guildProfile = new GuildProfile();
 
 export async function start(): Promise<void> {
   await guildProfile.start();
+
+    fluxDispatcher.subscribe(
+    "GUILD_MEMBER_LIST_UPDATE",
+    guildProfile.handleMemberListUpdate
+  );
 }
 
 export function stop(): void {
@@ -59,13 +50,16 @@ export function guildMenu(menu: any): void {
   if (!MenuGroup) return;
   if (menu.children.at(-2)?.props?.name === "guild-profile") return;
   const guildData = menu.data[0].guild;
+  const getMemberCount = (guildId) => {
+    return getMemberCounts(guildId);
+  }
   const guild = 
   <MenuGroup name="guild-profile" id="poop">
     <MenuItem
       label="Guild Profile"
       id="pee"
       action={() =>
-        openModal((props) => <GuildProfileModal {...props} guild={guildData} />
+        openModal((props) => <GuildProfileModal {...props} guild={guildData} getMemberCounts={getMemberCount} />
         )}
       />
   </MenuGroup>;
@@ -76,5 +70,41 @@ export function guildMenu(menu: any): void {
 export function getMemberCounts (id: string) {
   return new Promise((resolve) => {
     const memberCounts = memberCountsStore.getMemberCounts(id);
+
+    if (memberCounts) {
+      resolve(memberCounts);
+      return;
+    }
+
+    const { requestMembers } = webpack.getByProps(["requestMembers"]) as any;
+    requestMembers(id);
+
+    const updateMemberCounts = (memberListUpdate) => {
+      return updateTheMemberCounts(memberListUpdate);
+    };
+
+    function onRecive(memberListUpdate) {
+      if (memberListUpdate.guildId === id) {
+        resolve(updateMemberCounts(memberListUpdate));
+      }
+    }
+
+
+    fluxDispatcher.subscribe("GUILD_MEMBER_LIST_UPDATE", onRecive);
   })
 }
+
+export function updateTheMemberCounts(memberListUpdate) {
+  const { guildId, memberCount, groups } = memberListUpdate;
+  const onlineCount = groups
+    .map((group: any) => (group.id !== "offline" ? group.count : 0))
+    .reduce((a: any, b: any) => {
+      return a + b;
+    }, 0);
+  const memberCounts = { guildId, memberCount, onlineCount };
+
+  memberCountsActions.updateMemberCounts(memberCounts);
+  return memberCounts;
+}
+
+

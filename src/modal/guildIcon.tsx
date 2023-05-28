@@ -11,14 +11,11 @@ const { acronym } = await webpack.waitForModule<{
   acronym: string;
 }>(webpack.filters.byProps("childWrapper", "acronym"));
 
-const { getGuildIconURL } = await webpack.waitForModule<{
-  getGuildIconURL: (guild: Discord.Guild, size: number, format: string) => string;
-}>(webpack.filters.byProps("getGuildIconURL"));
+const { getGuildIconURL } = webpack.getByProps('getGuildIconURL');
 
 
 export const GuildProfileIcon = (props) => {
   const { guild } = props;
-
   return (
     <div className={`${avatar} ${wrapper}`}>
       <div style={{ width: '120px', height: '120px' }}>

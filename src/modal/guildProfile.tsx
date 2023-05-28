@@ -1,6 +1,8 @@
+import { Guild } from "discord-types/general";
 import { common, components, webpack } from "replugged";
+import { GuildProfileHeader } from "./guildProfileHeader";
 
-const { React } = common;
+const { React, flux } = common;
 const { Modal: { ModalRoot, ModalHeader, ModalContent, ModalFooter }, ErrorBoundary, Flex } = components;
 
 const { tabBarContainer, tabBar, tabBarItem, topSectionNormal } = await webpack.waitForModule<{
@@ -29,11 +31,11 @@ const GuildProfileSections = {
 export const GuildProfileModal = (props) => {
   console.log(props)
   const [section, setSection] = React.useState(GuildProfileSections.GUILD_INFO);
-  const [count, setCount] = React.useState(0);
+  const [counts, setCount] = React.useState(0);
 
   const { guild } = props;
   async function componentDidMount() {
-    const { guild, getMemberCounts } = props;
+    const { getMemberCounts } = props;
     const memberData = await getMemberCounts(guild.id);
     setCount(memberData);
   }
@@ -46,7 +48,7 @@ export const GuildProfileModal = (props) => {
     <ModalRoot className={root} transitionState={1}>
       <div className={topSectionNormal}>
         <ErrorBoundary>
-          <ModalRoot className={tabBarContainer}>
+          <GuildProfileHeader guild={guild} counts={counts} />
             <TabBar
               type='top'
               className={tabBar}
@@ -75,12 +77,49 @@ export const GuildProfileModal = (props) => {
                 Blocked Users
               </TabBar.Item>
             </TabBar>
-          </ModalRoot>
         </ErrorBoundary>
       </div>
     </ModalRoot>
   )
 
 }
+
+flux.connectStores(
+  [
+  webpack.getByProps('getRelationships'),
+  webpack.getByProps(['getCurrentUser', 'getUser']),
+  webpack.getByProps(['isMember']),
+],
+  ([relationshipStore, userStore, membersStore], compProps) => {
+    const userFetcher = webpack.getByProps(['getUser']);
+    const relationships = relationshipStore.getRelationships();
+    const props = {
+      friends: [],
+      blocked: [],
+    }
+
+    for (const userId in relationships) {
+      if (!membersStore.isMember(compProps.guild.id, userId)) {
+        continue;
+      }
+
+
+      const relationshipType = relationships[userId];
+      const user = userStore.getUser(userId);
+      if (!user) {
+        userFetcher?.getUser(userId);
+        continue;
+      }
+
+      if (relationshipType === 1) {
+        props.friends.push(user);
+      } else if (relationshipType === 2) {
+        props.blocked.push(user);
+      }
+    }
+
+    return props;
+  }
+)(GuildProfileModal)
 
 export default GuildProfileModal;
