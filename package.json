@@ -31,6 +31,7 @@
     "eslint-config-dmitmel": "github:dmitmel/eslint-config-dmitmel",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-react": "^7.32.2",
+    "moment": "^2.29.4",
     "prettier": "^2.8.7",
     "replugged": "^4.2.3",
     "typescript": "^5.0.3"

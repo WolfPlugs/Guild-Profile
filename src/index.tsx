@@ -4,6 +4,9 @@ import GuildProfileModal from "./modal/guildProfile";
 import memberCountsStore from "./store"
 import memberCountsActions from "./acts"
 
+import "./style.css";
+
+
 const { fluxDispatcher, React, flux } = common;
 const { openModal } = common.modal
 

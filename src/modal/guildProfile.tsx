@@ -1,6 +1,8 @@
 import { Guild } from "discord-types/general";
 import { common, components, webpack } from "replugged";
+
 import { GuildProfileHeader } from "./guildProfileHeader";
+import GuildInfo from './guildInfo';
 
 const { React, flux, users } = common;
 const {
@@ -36,26 +38,39 @@ const GuildProfileSections = {
 };
 
 export const GuildProfileModal = (props) => {
-  console.log(props);
   const [section, setSection] = React.useState(GuildProfileSections.GUILD_INFO);
   const [counts, setCount] = React.useState(0);
 
   const { guild } = props;
-  // async function componentDidMount() {
-  //   const { getMemberCounts } = props;
-  //   const memberData = await getMemberCounts(guild.id);
-  //   setCount(memberData);
-  // }
+  async function componentDidMount() {
+    const { getMemberCounts } = props;
+    const memberData = await getMemberCounts(guild.id);
+    setCount(memberData);
+  }
+
+  switch (section) {
+    case GuildProfileSections.GUILD_INFO:
+      setSection(<GuildInfo guild={guild} />);
+      break;
+    // case GuildProfileSections.FRIENDS:
+    //   return <Friends guild={guild} />;
+    // case GuildProfileSections.BLOCKED_USERS:
+    //   return <BlockedUsers guild={guild} />;
+    // default:
+    //   return null;
+  }
 
   // React.useEffect(async () => {
-  //   await componentDidMount();
+  //   componentDidMount();
   // });
 
   return (
     <ErrorBoundary>
       <ModalRoot className={root} transitionState={1}>
+        <Flex direction={Flex.Direction.VERTICAL}>
         <div className={topSectionNormal}>
           <GuildProfileHeader guild={guild} counts={counts} />
+          <div className={tabBarContainer}>
           <TabBar type="top" className={tabBar} selectedItem={section} onItemSelect={setSection}>
             <TabBar.Item
               className={tabBarItem}
@@ -76,7 +91,10 @@ export const GuildProfileModal = (props) => {
               Blocked Users
             </TabBar.Item>
           </TabBar>
+          </div>
         </div>
+         <div>{section}</div>
+        </Flex>
       </ModalRoot>
     </ErrorBoundary>
   );
@@ -90,7 +108,7 @@ export default flux.connectStores([relationShips, Users, guildUsers], (compProps
   };
 
   for (const userId in relationships) {
-    if (!guildUsers.isMember(compProps.guild.id, userId)) {
+    if (!users.isMember(compProps.guild.id, userId)) {
       continue;
     }
 
