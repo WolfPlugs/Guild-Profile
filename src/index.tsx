@@ -7,7 +7,7 @@ import memberCountsActions from "./acts"
 import "./style.css";
 
 
-const { fluxDispatcher, React, flux } = common;
+const { fluxDispatcher, React, flux, users, channel } = common;
 const { openModal } = common.modal
 
 
@@ -110,4 +110,13 @@ export function updateTheMemberCounts(memberListUpdate) {
   return memberCounts;
 }
 
+export async function openUserProfileModale(userId: string) {
+  await users.getUser(userId);
 
+  await fluxDispatcher.dispatch({
+    type: "USER_PROFILE_MODAL_OPEN",
+    userId,
+    channelId: channel.getChannelId(),
+    analythicsLocation: "Bikini Bottom"
+  })
+}

@@ -60,9 +60,10 @@ export const GuildProfileModal = (props) => {
     //   return null;
   }
 
-  // React.useEffect(async () => {
-  //   componentDidMount();
-  // });
+  React.useEffect(() => {
+    componentDidMount();
+  }, []);
+
 
   return (
     <ErrorBoundary>

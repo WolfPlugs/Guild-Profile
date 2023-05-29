@@ -31,6 +31,9 @@ devDependencies:
   moment:
     specifier: ^2.29.4
     version: 2.29.4
+  murmurhash:
+    specifier: ^2.0.1
+    version: 2.0.1
   prettier:
     specifier: ^2.8.7
     version: 2.8.7
@@ -3342,6 +3345,10 @@ packages:
     resolution: {integrity: sha512-mpPs3qqTug6ahbblkThoUY2DQdNXcm4IapwOS3Vm/87vmpzLVelvp9h3It1y9l1VPpiFLV11vfOXnmeEwiIXwg==}
     optionalDependencies:
       msgpackr-extract: 3.0.2
+    dev: true
+
+  /murmurhash@2.0.1:
+    resolution: {integrity: sha512-5vQEh3y+DG/lMPM0mCGPDnyV8chYg/g7rl6v3Gd8WMF9S429ox3Xk8qrk174kWhG767KQMqqxLD1WnGd77hiew==}
     dev: true
 
   /natural-compare-lite@1.4.0:
