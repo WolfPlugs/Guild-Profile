@@ -1,4 +1,4 @@
-import { common, componentsm webpack } from 'replugged'
+import { common, components, webpack } from 'replugged'
 
 const { React } = common
 const { Tooltip } = components
