@@ -23,7 +23,7 @@ const { hidePersonalInformation } = await webpack.waitForModule<{
 }>(webpack.filters.byProps("hidePersonalInformation"));
 
 const { FormSection } = await webpack.waitForModule<{
-  FormSection: (props: { title: string; children?: React.ReactNode; className?: string }) => React.ReactNode;
+  FormSection: (props: { title: string; children?: React.ReactNode; className?: string }) => JSX.Element;
 }>(webpack.filters.byProps("FormSection"));
 
 const { getSerializedState } = webpack.getByProps("getSerializedState");
@@ -62,6 +62,7 @@ export const Sections = (props) => {
   return (
     <FormSection
     className={`${marginBottom8} guild-info-section`}
+    tag='h5'
     title={title}
     >
       <Text selectable={true}>
@@ -135,7 +136,7 @@ export const GuildInfo = (props) => {
   }
 
   return (
-    <ModalContent>
+    <ModalContent className={`guild-profile`}>
       <Flex wrap={Flex.Wrap.WRAP} justify={Flex.Justify.START}>
         <Sections title={i18n.Messages.GUILD_OWNER}>
           {/* {owner ? (

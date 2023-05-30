@@ -6,12 +6,10 @@
  .guild-info-section {
   padding: 5px 10px;
 }
-
 .guild-profile {
   padding: 20px 10px;
   height: 100%;
 }
-
 .guild-icon-acronym {
   font-size: 2em;
   text-align: center;
@@ -20,7 +18,6 @@
   overflow: hidden;
   width: 100%;
 }
-
 .guild-profile-feature-badge {
   color: var(--interactive-normal);
 }

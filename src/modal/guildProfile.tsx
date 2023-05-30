@@ -3,6 +3,7 @@ import { common, components, webpack } from "replugged";
 
 import { GuildProfileHeader } from "./guildProfileHeader";
 import GuildInfo from './guildInfo';
+import GuildFriends from "./guildFriends";
 
 const { React, flux, users } = common;
 const {
@@ -11,16 +12,14 @@ const {
   Flex,
 } = components;
 
-const { tabBarContainer, tabBar, tabBarItem, topSectionNormal } = await webpack.waitForModule<{
+const { tabBarContainer, tabBar, tabBarItem, topSection, body, root} = await webpack.waitForModule<{
   tabBarContainer: string;
   tabBar: string;
   tabBarItem: string;
-  topSectionNormal: string;
-}>(webpack.filters.byProps("tabBarContainer"));
-
-const { root } = await webpack.waitForModule<{
+  topSection: string;
+  body: string;
   root: string;
-}>(webpack.filters.byProps("root"));
+}>(webpack.filters.byProps("topSection"));
 
 const TabBar = webpack.getExportsForProps(
   await webpack.waitForModule(webpack.filters.bySource('[role="tab"][aria-disabled="false"]')),
@@ -41,7 +40,7 @@ export const GuildProfileModal = (props) => {
   const [section, setSection] = React.useState(GuildProfileSections.GUILD_INFO);
   const [counts, setCount] = React.useState(0);
 
-  const { guild } = props;
+  const { guild, friends } = props;
   async function componentDidMount() {
     const { getMemberCounts } = props;
     const memberData = await getMemberCounts(guild.id);
@@ -52,7 +51,11 @@ export const GuildProfileModal = (props) => {
     case GuildProfileSections.GUILD_INFO:
       setSection(<GuildInfo guild={guild} />);
       break;
-    // case GuildProfileSections.FRIENDS:
+    case GuildProfileSections.FRIENDS:
+      setSection(<GuildFriends
+        section={section}
+        relationships={friends}/>);
+      break;
     //   return <Friends guild={guild} />;
     // case GuildProfileSections.BLOCKED_USERS:
     //   return <BlockedUsers guild={guild} />;
@@ -66,38 +69,42 @@ export const GuildProfileModal = (props) => {
 
 
   return (
-    <ErrorBoundary>
-      <ModalRoot className={root} transitionState={1}>
-        <Flex direction={Flex.Direction.VERTICAL}>
-        <div className={topSectionNormal}>
-          <GuildProfileHeader guild={guild} counts={counts} />
-          <div className={tabBarContainer}>
-          <TabBar type="top" className={tabBar} selectedItem={section} onItemSelect={setSection}>
-            <TabBar.Item
-              className={tabBarItem}
-              id={GuildProfileSections.GUILD_INFO}
-              key={GuildProfileSections.GUILD_INFO}>
-              Server Info
-            </TabBar.Item>
-            <TabBar.Item
-              className={tabBarItem}
-              id={GuildProfileSections.FRIENDS}
-              key={GuildProfileSections.FRIENDS}>
-              Friends
-            </TabBar.Item>
-            <TabBar.Item
-              className={tabBarItem}
-              id={GuildProfileSections.BLOCKED_USERS}
-              key={GuildProfileSections.BLOCKED_USERS}>
-              Blocked Users
-            </TabBar.Item>
-          </TabBar>
-          </div>
+    <ModalRoot className={root} transitionState={1}>
+        <div className={topSection}>
+          <ErrorBoundary>
+            <GuildProfileHeader guild={guild} counts={counts} />
+            <div className={tabBarContainer}>
+              <TabBar 
+              type="top" 
+              className={tabBar} 
+              selectedItem={section} 
+              onItemSelect={setSection}
+              >
+                <TabBar.Item
+                  className={tabBarItem}
+                  id={GuildProfileSections.GUILD_INFO}
+                  key={GuildProfileSections.GUILD_INFO}>
+                  Server Info
+                </TabBar.Item>
+                <TabBar.Item
+                  className={tabBarItem}
+                  id={GuildProfileSections.FRIENDS}
+                  key={GuildProfileSections.FRIENDS}>
+                  Friends
+                </TabBar.Item>
+                <TabBar.Item
+                  className={tabBarItem}
+                  id={GuildProfileSections.BLOCKED_USERS}
+                  key={GuildProfileSections.BLOCKED_USERS}>
+                  Blocked Users
+                </TabBar.Item>
+              </TabBar>
+            </div>
+          </ErrorBoundary>
         </div>
-         <div>{section}</div>
-        </Flex>
-      </ModalRoot>
-    </ErrorBoundary>
+        <div className={body}>{section}</div>
+    </ModalRoot>
+
   );
 };
 

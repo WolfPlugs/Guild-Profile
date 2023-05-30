@@ -48,6 +48,7 @@ export const GuildProfileFeatures = (props) => {
                   guild.features.size > 14 ? profileBadge18 : profileBadge24,
                   profileBadge,
                   desaturate,
+                  "guild-profile-feature-badge"
                 ].join(" ")}
               />
             </Tooltip>
